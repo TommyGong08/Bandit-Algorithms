@@ -1,0 +1,6 @@
+.DS_Store
+*csv
+*tsv
+*pyc
+.idea
+data
