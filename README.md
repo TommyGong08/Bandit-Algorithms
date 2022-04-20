@@ -29,7 +29,7 @@ The Ruby code was contributed by Kashif Rasul. If you're interested in translati
 # How To Adding New Algorithms: API Expectations
 
 All the algorithms are written in **bandit.py**. 
-The parent class is **Bandit()** and if you would like to test your own algorithms, please written a new class inherited the parent class.  
+The parent class is **Bandit()** and if you would like to test your own algorithms, please code a new class inherited the parent class.  
 
 #### For example
 ```python
