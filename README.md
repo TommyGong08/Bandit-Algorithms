@@ -7,10 +7,7 @@ This repo contains code in several languages that implements several standard al
 * UCB1
 * ETC
 
-
-# Languages
-
-##  Requirement
+#  Requirement
 - python 3.6  
 
 
@@ -54,6 +51,9 @@ class Epsilon_Greedy(Bandit):
         ...
 ```
 
+# TODO  
+- [ ] add UCB2 algorithms
+- [ ] add EXP3 algorithms
 
 # Reference
 In R, there is a body of code for visualizing the results of simulations and analyzing those results. The R code would benefit from some refactoring to make it DRYer.

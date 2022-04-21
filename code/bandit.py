@@ -1,4 +1,6 @@
 # coding=utf-8
+import math
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,9 +12,9 @@ mpl.rcParams['font.sans-serif'] = ['SimHei']
 class Bandit:
     def __init__(self, k_arm=10, initial=0., step_size=0.1, sample_averages=0, true_reward=0.):
         self.k = k_arm  # 设定Bandit臂数
-        self.step_size = step_size # 设定更新步长
-        self.sample_averages = sample_averages # int变量，1表示使用简单增量式算法, 0表示不使用简单增量式算法，2表示使用gradient
-        self.indices = np.arange(self.k) # 创建动作索引（和Bandit臂数长度相同）
+        self.step_size = step_size  # 设定更新步长
+        self.sample_averages = sample_averages  # int变量，1表示使用简单增量式算法, 0表示不使用简单增量式算法，2表示使用gradient
+        self.indices = np.arange(self.k)  # 创建动作索引（和Bandit臂数长度相同）
         self.initial = initial  # 设定初始价值估计，如果调高就是乐观初始值
         self.true_reward = true_reward  # 存储一个Bandit的真实收益均值，为下面制作一个Bandit的真实价值函数做准备
         self.average_reward = 0  # 用于存储baseline所需的平均收益
@@ -133,3 +135,48 @@ class Gradient(Bandit):
         self.action_prob = exp_est / np.sum(exp_est)
         return np.random.choice(self.indices, p=self.action_prob)
 
+
+class UCB2(Bandit):
+    def __init__(self, k_arm=10, initial=0., step_size=0.1, sample_averages=0, alpha=0.1):
+        Bandit.__init__(self, k_arm, initial, step_size, sample_averages)
+        # UCB2参数
+        self.alpha = alpha  # UCB2公式中的alpha
+        self.r = [0 for col in range(self.k)]
+        self.__current_arm = 0
+        self.__next_update = 0
+
+    def __bonus(self, n, rs):
+        tau = self.__tau(rs)
+        bonus = [math.sqrt((1. + self.alpha) * math.log(math.e * float(n) / t) / (2 * t)) for t in tau]
+        return bonus
+
+    def __tau(self, rs):
+        return [int(math.ceil((1 + self.alpha) ** r)) for r in rs]
+
+    def __tau_i(self, r):
+        return int(math.ceil((1 + self.alpha) ** r))
+
+    def __set_arm(self, arm):
+        self.__current_arm = arm
+        self.__next_update += max(1, self.__tau_i(self.r[arm] + 1) - self.__tau_i(self.r[arm]))
+        # 确保玩tau(ri+1)-tau(ri)次
+        self.r[arm] += 1
+
+    def act(self):
+        # play each arm once
+        for arm in range(self.k):
+            if self.action_count[arm] == 0:
+                self.__set_arm(arm)
+                return arm
+
+        # 执行次数限制
+        if self.__next_update > sum(self.action_count):
+            return self.__current_arm
+        total_counts = sum(self.action_count)
+        bonus = self.__bonus(total_counts, self.r)
+        UCB2_estimation = self.q_estimation + bonus
+
+        # 选择不同动作导致的预测值中最大的
+        q_best = np.max(UCB2_estimation)
+        self.__set_arm(np.random.choice(np.where(UCB2_estimation == q_best)[0]))
+        return np.random.choice(np.where(UCB2_estimation == q_best)[0])
