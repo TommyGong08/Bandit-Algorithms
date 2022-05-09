@@ -102,9 +102,9 @@ def figure_UCB1(runs=2000, time=1000):
 
 
 # UCB2测试
-def figure_UCB2(runs=1000, time=5000):
-    alphas = [0.8]
-    bandits = [UCB2(alpha=alpha, sample_averages=0) for alpha in alphas]
+def figure_UCB2(runs=500, time=5000):
+    alphas = [0.5, 0.1]
+    bandits = [UCB2(alpha=alpha, step_size=1, sample_averages=0) for alpha in alphas]
     best_action_counts, average_rewards = simulate(runs, time, bandits)
     plt.figure(figsize=(10, 7))
 
@@ -151,6 +151,30 @@ def figure_mix(runs=2000, time=1000):
     plt.plot(best_action_counts[2], label='epsilon greedy epsilon = 0.1')
     plt.plot(best_action_counts[3], label='epsilon greedy epsilon = 0.01')
     plt.plot(best_action_counts[4], label='explore-then-commit M = 20')
+    plt.xlabel('steps')
+    plt.ylabel('% optimal action')
+    plt.legend()
+    plt.show()
+
+
+# MIX测试
+def figure_mix2(runs=1000, time=1000):
+    bandits = [UCB1(UCB_param=2, sample_averages=1),
+               UCB2(alpha=0.5, step_size=1, sample_averages=1)]
+    best_action_counts, average_rewards = simulate(runs, time, bandits)
+
+    plt.figure(figsize=(10, 7))
+
+    plt.subplot(2, 1, 1)
+    plt.plot(average_rewards[0], label='UCB1 c = 2')
+    plt.plot(average_rewards[1], label='UCB2 alpha = 0.5')
+    plt.xlabel('steps')
+    plt.ylabel('Average reward')
+    plt.legend()
+
+    plt.subplot(2, 1, 2)
+    plt.plot(best_action_counts[0], label='UCB1 c = 2')
+    plt.plot(best_action_counts[1], label='UCB2 alpha = 0.5')
     plt.xlabel('steps')
     plt.ylabel('% optimal action')
     plt.legend()
